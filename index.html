@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="Freelancer KPI Dashboard - Track revenue, profit, growth, and top clients">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRnJlZWxhbmNlciBLUEkgRGFzaGJvYXJkIiwic2hvcnRfbmFtZSI6IkZyZWVsYW5jZXIgS1BJIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjE3MmEiLCJ0aGVtZV9jb2xvciI6IiM2MzY2ZjEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIGZpbGw9JyM2MzY2ZjEnLyUzRSUzQ3RleHQgeD0nNTAlMjUneT0nNTUlMjUnIGZvbnQtc2l6ZT0nNTAnIGZpbGw9J3doaXRlJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyUzRUYlM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%236366f1'/%3E%3Ctext x='50%25' y='55%25' font-size='50' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+    <title>Freelancer KPI Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .period-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .period-btn {
+            padding: 8px 20px;
+            border: 2px solid #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            color: #f1f5f9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .period-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .period-btn.active {
+            background: #6366f1;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f1f5f9, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .kpi-change.positive {
+            color: #10b981;
+        }
+
+        .kpi-change.negative {
+            color: #ef4444;
+        }
+
+        .chart-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .top-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+
+        .top-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .item-list {
+            list-style: none;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .item-row:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateX(5px);
+        }
+
+        .item-rank {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-right: 15px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .item-detail {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .item-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .kpi-value {
+                font-size: 2rem;
+            }
+
+            .chart-section,
+            .top-items {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card,
+            .top-card {
+                min-width: 100%;
+            }
+        }
+
+        .install-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #6366f1;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.5);
+            cursor: pointer;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Freelancer KPI Dashboard</h1>
+            <p style="color: #94a3b8; margin-top: 10px;">Track your business performance in real-time</p>
+            <div class="period-selector">
+                <button class="period-btn" data-period="week">This Week</button>
+                <button class="period-btn active" data-period="month">This Month</button>
+                <button class="period-btn" data-period="quarter">This Quarter</button>
+                <button class="period-btn" data-period="year">This Year</button>
+            </div>
+        </header>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span class="icon">💰</span>
+                    Total Revenue
+                </div>
+                <div class="kpi-value" id="revenue">$0</div>
+                <div class="kpi-change positive" id="revenue-change">
+                    ▲ 0% vs last period
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span class="icon">📈</span>
+                    Net Profit
+                </div>
+                <div class="kpi-value" id="profit">$0</div>
+                <div class="kpi-change positive" id="profit-change">
+                    ▲ 0% vs last period
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span class="icon">📊</span>
+                    Profit Margin
+                </div>
+                <div class="kpi-value" id="margin">0%</div>
+                <div class="kpi-change positive" id="margin-change">
+                    ▲ 0% vs last period
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span class="icon">🚀</span>
+                    YoY Growth
+                </div>
+                <div class="kpi-value" id="yoy-growth">0%</div>
+                <div class="kpi-change positive" id="yoy-detail">
+                    Revenue growth
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-card">
+                <h3 class="chart-title">Revenue vs Profit Trend</h3>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3 class="chart-title">Monthly Performance</h3>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="top-items">
+            <div class="top-card">
+                <h3 class="chart-title">🏆 Top Customers</h3>
+                <ul class="item-list" id="top-customers"></ul>
+            </div>
+
+            <div class="top-card">
+                <h3 class="chart-title">⭐ Top Services</h3>
+                <ul class="item-list" id="top-services"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="install-prompt" id="installPrompt">
+        📱 Install App
+    </div>
+
+    <script>
+        // Sample data generator
+        const data = {
+            week: {
+                revenue: 4850,
+                profit: 3395,
+                lastRevenue: 4200,
+                lastProfit: 2940,
+                yoyGrowth: 28.5,
+                trend: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                revenueData: [650, 720, 690, 780, 850, 680, 480],
+                profitData: [455, 504, 483, 546, 595, 476, 336]
+            },
+            month: {
+                revenue: 18750,
+                profit: 13125,
+                lastRevenue: 16200,
+                lastProfit: 11340,
+                yoyGrowth: 32.8,
+                trend: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                revenueData: [4200, 4850, 5100, 4600],
+                profitData: [2940, 3395, 3570, 3220]
+            },
+            quarter: {
+                revenue: 54500,
+                profit: 38150,
+                lastRevenue: 48300,
+                lastProfit: 33810,
+                yoyGrowth: 35.2,
+                trend: ['Month 1', 'Month 2', 'Month 3'],
+                revenueData: [17800, 18750, 17950],
+                profitData: [12460, 13125, 12565]
+            },
+            year: {
+                revenue: 215000,
+                profit: 150500,
+                lastRevenue: 178000,
+                lastProfit: 124600,
+                yoyGrowth: 20.8,
+                trend: ['Q1', 'Q2', 'Q3', 'Q4'],
+                revenueData: [48300, 54500, 58200, 54000],
+                profitData: [33810, 38150, 40740, 37800]
+            }
+        };
+
+        const customers = [
+            { name: 'TechCorp Inc.', projects: 8, revenue: 24500 },
+            { name: 'StartupHub', projects: 12, revenue: 18750 },
+            { name: 'Digital Solutions', projects: 6, revenue: 15200 },
+            { name: 'Creative Agency', projects: 10, revenue: 12800 },
+            { name: 'E-Commerce Co.', projects: 5, revenue: 9500 }
+        ];
+
+        const services = [
+            { name: 'Web Development', projects: 15, revenue: 35000 },
+            { name: 'UI/UX Design', projects: 22, revenue: 28500 },
+            { name: 'Mobile Apps', projects: 8, revenue: 22000 },
+            { name: 'Consulting', projects: 18, revenue: 18200 },
+            { name: 'SEO Services', projects: 12, revenue: 14300 }
+        ];
+
+        let currentPeriod = 'month';
+        let revenueChart, monthlyChart;
+
+        // Initialize charts
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#f1f5f9' }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            };
+
+            revenueChart = new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: data[currentPeriod].trend,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data[currentPeriod].revenueData,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Profit',
+                        data: data[currentPeriod].profitData,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: chartOptions
+            });
+
+            monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [16200, 17800, 18750, 17500, 19200, 18900, 20100, 19500, 18800, 19800, 20500, 18750],
+                        backgroundColor: '#6366f1'
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        // Update dashboard
+        function updateDashboard(period) {
+            currentPeriod = period;
+            const d = data[period];
+            
+            // Update KPIs
+            document.getElementById('revenue').textContent = '$' + d.revenue.toLocaleString();
+            document.getElementById('profit').textContent = '$' + d.profit.toLocaleString();
+            
+            const margin = ((d.profit / d.revenue) * 100).toFixed(1);
+            document.getElementById('margin').textContent = margin + '%';
+            document.getElementById('yoy-growth').textContent = d.yoyGrowth + '%';
+            
+            // Update changes
+            const revChange = (((d.revenue - d.lastRevenue) / d.lastRevenue) * 100).toFixed(1);
+            const profitChange = (((d.profit - d.lastProfit) / d.lastProfit) * 100).toFixed(1);
+            const marginChange = (margin - ((d.lastProfit / d.lastRevenue) * 100)).toFixed(1);
+            
+            updateChange('revenue-change', revChange);
+            updateChange('profit-change', profitChange);
+            updateChange('margin-change', marginChange);
+            
+            // Update charts
+            revenueChart.data.labels = d.trend;
+            revenueChart.data.datasets[0].data = d.revenueData;
+            revenueChart.data.datasets[1].data = d.profitData;
+            revenueChart.update();
+        }
+
+        function updateChange(id, value) {
+            const el = document.getElementById(id);
+            const isPositive = value >= 0;
+            el.className = 'kpi-change ' + (isPositive ? 'positive' : 'negative');
+            el.textContent = (isPositive ? '▲ ' : '▼ ') + Math.abs(value) + '% vs last period';
+        }
+
+        // Render top items
+        function renderTopItems() {
+            const customersHtml = customers.map((c, i) => `
+                <li class="item-row">
+                    <span class="item-rank">${i + 1}</span>
+                    <div class="item-info">
+                        <div class="item-name">${c.name}</div>
+                        <div class="item-detail">${c.projects} projects</div>
+                    </div>
+                    <div class="item-value">$${c.revenue.toLocaleString()}</div>
+                </li>
+            `).join('');
+            
+            const servicesHtml = services.map((s, i) => `
+                <li class="item-row">
+                    <span class="item-rank">${i + 1}</span>
+                    <div class="item-info">
+                        <div class="item-name">${s.name}</div>
+                        <div class="item-detail">${s.projects} projects</div>
+                    </div>
+                    <div class="item-value">$${s.revenue.toLocaleString()}</div>
+                </li>
+            `).join('');
+            
+            document.getElementById('top-customers').innerHTML = customersHtml;
+            document.getElementById('top-services').innerHTML = servicesHtml;
+        }
+
+        // Period selector
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateDashboard(btn.dataset.period);
+            });
+        });
+
+        // PWA Installation
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').style.display = 'block';
+        });
+
+        document.getElementById('installPrompt').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+        });
+
+        // Initialize
+        initCharts();
+        updateDashboard('month');
+        renderTopItems();
+    </script>
+</body>
+</html>
